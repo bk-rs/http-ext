@@ -1,3 +1,4 @@
+use alloc::string::String;
 use core::{fmt, str::FromStr};
 
 use crate::schemes::{NAME_BASIC, NAME_BEARER, NAME_DIGEST, SP};
@@ -29,9 +30,8 @@ impl FromStr for Credentials {
     type Err = CredentialsParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut split = s.split(SP);
-        let scheme = split.next().ok_or(Self::Err::SchemeMismatch)?;
-        match scheme {
+        let scheme = s.chars().take_while(|x| x != &SP).collect::<String>();
+        match scheme.as_str() {
             NAME_BASIC => {
                 #[cfg(feature = "scheme-basic")]
                 {
@@ -70,10 +70,18 @@ pub enum CredentialsParseError {
     Basic(crate::schemes::basic::CredentialsParseError),
     #[cfg(feature = "scheme-bearer")]
     Bearer(crate::schemes::bearer::CredentialsParseError),
-    SchemeMismatch,
     SchemeUnknown,
     SchemeUnsupported(&'static str),
 }
+
+impl fmt::Display for CredentialsParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for CredentialsParseError {}
 
 #[cfg(test)]
 mod tests {

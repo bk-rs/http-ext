@@ -7,10 +7,10 @@ use alloc::{
 };
 use core::{fmt, str::FromStr};
 
-use crate::schemes::{NAME_BASIC as NAME, SP};
+use crate::schemes::{NAME_BASIC as NAME, SP_STR};
 
 //
-const COLON: &str = ":";
+const COLON: char = ':';
 
 //
 //
@@ -36,7 +36,7 @@ impl fmt::Display for Credentials {
             f,
             "{}{}{}",
             NAME,
-            SP,
+            SP_STR,
             base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
         )
     }
@@ -54,15 +54,15 @@ impl FromStr for Credentials {
             return Err(Self::Err::SchemeMismatch);
         }
 
-        if s[NAME.len()..NAME.len() + 1] != *SP {
+        if s[NAME.len()..NAME.len() + 1] != *SP_STR {
             return Err(Self::Err::OneSPMismatch);
         }
 
         let param_bytes =
             base64::decode(&s[NAME.len() + 1..]).map_err(Self::Err::ParamBase64DecodeFailed)?;
 
-        let param_str =
-            String::from_utf8(param_bytes).map_err(Self::Err::ParamFromBase64DecodeBytesFailed)?;
+        let param_str = String::from_utf8(param_bytes)
+            .map_err(Self::Err::ParamBase64DecodedBytesToUtf8Failed)?;
 
         let mut split = param_str.split(COLON);
         let user_id = split.next().ok_or(Self::Err::ParamUserIdMissing)?;
@@ -80,12 +80,21 @@ pub enum CredentialsParseError {
     SchemeMismatch,
     OneSPMismatch,
     ParamBase64DecodeFailed(base64::DecodeError),
-    ParamFromBase64DecodeBytesFailed(string::FromUtf8Error),
+    ParamBase64DecodedBytesToUtf8Failed(string::FromUtf8Error),
     ParamUserIdMissing,
     ParamPasswordMissing,
     ParamPairsMismatch,
     Other(&'static str),
 }
+
+impl fmt::Display for CredentialsParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for CredentialsParseError {}
 
 #[cfg(test)]
 mod tests {

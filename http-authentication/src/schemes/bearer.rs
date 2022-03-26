@@ -3,7 +3,7 @@
 use alloc::boxed::Box;
 use core::{fmt, str::FromStr};
 
-use crate::schemes::{NAME_BEARER as NAME, SP};
+use crate::schemes::{NAME_BEARER as NAME, SP_STR};
 
 //
 //
@@ -23,7 +23,7 @@ impl Credentials {
 
 impl fmt::Display for Credentials {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}{}", NAME, SP, self.token)
+        write!(f, "{}{}{}", NAME, SP_STR, self.token)
     }
 }
 
@@ -39,7 +39,7 @@ impl FromStr for Credentials {
             return Err(Self::Err::SchemeMismatch);
         }
 
-        if s[NAME.len()..NAME.len() + 1] != *SP {
+        if s[NAME.len()..NAME.len() + 1] != *SP_STR {
             return Err(Self::Err::OneSPMismatch);
         }
 
@@ -55,6 +55,15 @@ pub enum CredentialsParseError {
     OneSPMismatch,
     Other(&'static str),
 }
+
+impl fmt::Display for CredentialsParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for CredentialsParseError {}
 
 #[cfg(test)]
 mod tests {

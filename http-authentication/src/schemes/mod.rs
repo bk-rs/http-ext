@@ -3,7 +3,9 @@ pub const NAME_BEARER: &str = "Bearer";
 pub const NAME_DIGEST: &str = "Digest";
 
 //
-pub(crate) const SP: &str = " ";
+#[allow(dead_code)]
+pub(crate) const SP_STR: &str = " ";
+pub(crate) const SP: char = ' ';
 
 //
 #[cfg(feature = "scheme-basic")]
