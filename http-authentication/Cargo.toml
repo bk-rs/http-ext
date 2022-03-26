@@ -1,0 +1,28 @@
+[package]
+name = "http-authentication"
+version = "0.0.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2021"
+description = "HTTP Authentication"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/http-ext"
+homepage = "https://github.com/bk-rs/http-ext"
+documentation = "https://docs.rs/http-authentication"
+keywords = []
+categories = []
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["std", "scheme-basic"]
+std = []
+# schemes
+scheme-basic = ["base64"]
+
+[dependencies]
+base64 = { version = "0.13", default-features = false, features = ["alloc"], optional = true }
+
+[package.metadata.cargo-all-features]
+skip_optional_dependencies = true
