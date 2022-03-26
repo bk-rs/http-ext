@@ -16,13 +16,15 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["std", "scheme-basic", "scheme-bearer"]
+default = ["std", "http", "scheme-basic", "scheme-bearer"]
 std = []
 # schemes
 scheme-basic = ["base64"]
 scheme-bearer = []
 
 [dependencies]
+http = { version = "0.2", default-features = false, optional = true }
+
 base64 = { version = "0.13", default-features = false, features = ["alloc"], optional = true }
 
 [package.metadata.cargo-all-features]

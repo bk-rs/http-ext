@@ -19,6 +19,10 @@ impl Credentials {
             token: token.as_ref().into(),
         }
     }
+
+    pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
+        todo!()
+    }
 }
 
 impl fmt::Display for Credentials {

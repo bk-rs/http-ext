@@ -12,6 +12,12 @@ pub enum Credentials {
     Bearer(crate::schemes::bearer::Credentials),
 }
 
+impl Credentials {
+    pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
+        todo!()
+    }
+}
+
 #[allow(unused_variables)]
 impl fmt::Display for Credentials {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
