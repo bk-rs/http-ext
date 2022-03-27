@@ -28,5 +28,5 @@ pub use credentials::Credentials;
 pub mod schemes;
 
 //
-#[cfg(all(feature = "std", feature = "http"))]
+#[cfg(feature = "http")]
 pub mod header_utils;

@@ -122,14 +122,7 @@ impl std::error::Error for ChallengesParseError {}
 
 impl fmt::Display for Challenges {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<_>>()
-                .join(format!("{}{}", COMMA, SP).as_str())
-        )
+        write!(f, "{}", ChallengesWithSlice(self.0.as_ref()))
     }
 }
 
@@ -139,6 +132,33 @@ impl FromStr for Challenges {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::internal_from_str(s)
+    }
+}
+
+//
+//
+#[derive(Debug, Clone)]
+pub(crate) struct ChallengesWithSlice<'a>(&'a [Challenge]);
+
+impl<'a> ChallengesWithSlice<'a> {
+    #[allow(dead_code)]
+    pub(crate) fn new(inner: &'a [Challenge]) -> Self {
+        Self(inner)
+    }
+}
+
+//
+impl fmt::Display for ChallengesWithSlice<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.0
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<_>>()
+                .join(format!("{}{}", COMMA, SP).as_str())
+        )
     }
 }
 
