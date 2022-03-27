@@ -12,7 +12,4 @@ pub mod schemes;
 
 //
 #[cfg(all(feature = "std", feature = "http"))]
-mod impl_http;
-
-#[cfg(all(feature = "std", feature = "http"))]
-pub use impl_http::{parse_header_authorization, parse_header_proxy_authorization};
+pub mod header_utils;

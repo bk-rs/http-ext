@@ -13,6 +13,16 @@ pub enum Credentials {
 }
 
 impl Credentials {
+    #[cfg(feature = "scheme-basic")]
+    pub fn basic(user_id: impl AsRef<str>, password: impl AsRef<str>) -> Self {
+        Self::Basic(crate::schemes::basic::Credentials::new(user_id, password))
+    }
+
+    #[cfg(feature = "scheme-bearer")]
+    pub fn bearer(token: impl AsRef<str>) -> Self {
+        Self::Bearer(crate::schemes::bearer::Credentials::new(token))
+    }
+
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
         let bytes = bytes.as_ref();
 
@@ -111,17 +121,15 @@ mod tests {
         //
         #[cfg(feature = "scheme-basic")]
         {
-            match crate::schemes::basic::DEMO_CREDENTIALS_STR.parse::<Credentials>() {
+            use crate::schemes::basic::{
+                DEMO_CREDENTIALS_PASSWORD_STR, DEMO_CREDENTIALS_STR, DEMO_CREDENTIALS_USER_ID_STR,
+            };
+
+            match DEMO_CREDENTIALS_STR.parse::<Credentials>() {
                 Ok(Credentials::Basic(c)) => {
-                    assert_eq!(
-                        c.user_id,
-                        crate::schemes::basic::DEMO_CREDENTIALS_USER_ID_STR.into()
-                    );
-                    assert_eq!(
-                        c.password,
-                        crate::schemes::basic::DEMO_CREDENTIALS_PASSWORD_STR.into()
-                    );
-                    assert_eq!(c.to_string(), crate::schemes::basic::DEMO_CREDENTIALS_STR);
+                    assert_eq!(c.user_id, DEMO_CREDENTIALS_USER_ID_STR.into());
+                    assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
+                    assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
                 }
                 x => panic!("{:?}", x),
             }
@@ -137,13 +145,12 @@ mod tests {
         //
         #[cfg(feature = "scheme-bearer")]
         {
-            match crate::schemes::bearer::DEMO_CREDENTIALS_STR.parse::<Credentials>() {
+            use crate::schemes::bearer::{DEMO_CREDENTIALS_STR, DEMO_CREDENTIALS_TOKEN_STR};
+
+            match DEMO_CREDENTIALS_STR.parse::<Credentials>() {
                 Ok(Credentials::Bearer(c)) => {
-                    assert_eq!(
-                        c.token,
-                        crate::schemes::bearer::DEMO_CREDENTIALS_TOKEN_STR.into()
-                    );
-                    assert_eq!(c.to_string(), crate::schemes::bearer::DEMO_CREDENTIALS_STR);
+                    assert_eq!(c.token, DEMO_CREDENTIALS_TOKEN_STR.into());
+                    assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
                 }
                 x => panic!("{:?}", x),
             }
