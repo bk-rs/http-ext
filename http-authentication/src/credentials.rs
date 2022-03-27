@@ -68,28 +68,7 @@ impl Credentials {
     }
 }
 
-#[allow(unused_variables)]
-impl fmt::Display for Credentials {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            #[cfg(feature = "scheme-basic")]
-            Self::Basic(c) => c.fmt(f),
-            #[cfg(feature = "scheme-bearer")]
-            Self::Bearer(c) => c.fmt(f),
-            #[allow(unreachable_patterns)]
-            _ => unimplemented!(),
-        }
-    }
-}
-
-impl FromStr for Credentials {
-    type Err = CredentialsParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_bytes(s.as_bytes())
-    }
-}
-
+//
 #[derive(Debug)]
 pub enum CredentialsParseError {
     #[cfg(feature = "scheme-basic")]
@@ -108,6 +87,30 @@ impl fmt::Display for CredentialsParseError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for CredentialsParseError {}
+
+//
+#[allow(unused_variables)]
+impl fmt::Display for Credentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            #[cfg(feature = "scheme-basic")]
+            Self::Basic(c) => c.fmt(f),
+            #[cfg(feature = "scheme-bearer")]
+            Self::Bearer(c) => c.fmt(f),
+            #[allow(unreachable_patterns)]
+            _ => unimplemented!(),
+        }
+    }
+}
+
+//
+impl FromStr for Credentials {
+    type Err = CredentialsParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bytes(s.as_bytes())
+    }
+}
 
 #[cfg(test)]
 mod tests {
