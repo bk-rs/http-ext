@@ -17,6 +17,7 @@ pub mod challenges;
 pub mod credentials;
 
 pub use challenge::Challenge;
+pub use challenges::Challenges;
 pub use credentials::Credentials;
 
 //

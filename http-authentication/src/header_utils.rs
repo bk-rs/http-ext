@@ -1,9 +1,12 @@
 use http::{
-    header::{AUTHORIZATION, PROXY_AUTHORIZATION},
+    header::{AUTHORIZATION, PROXY_AUTHENTICATE, PROXY_AUTHORIZATION, WWW_AUTHENTICATE},
     HeaderMap,
 };
 
-use crate::credentials::{Credentials, CredentialsParseError};
+use crate::{
+    challenges::{Challenges, ChallengesParseError},
+    credentials::{Credentials, CredentialsParseError},
+};
 
 //
 //
@@ -89,6 +92,29 @@ pub fn set_proxy_authorization_with_bearer(
     Ok(())
 }
 
+//
+//
+//
+pub fn get_www_authenticate(header_map: &HeaderMap) -> Result<Challenges, ChallengesParseError> {
+    let list = header_map
+        .get_all(WWW_AUTHENTICATE)
+        .into_iter()
+        .map(|x| Challenges::from_bytes(x.as_bytes()))
+        .collect::<Result<Vec<_>, _>>()?;
+    let list = list.into_iter().flat_map(|x| x.0).collect::<Vec<_>>();
+    Ok(Challenges::new(list))
+}
+
+pub fn get_proxy_authenticate(header_map: &HeaderMap) -> Result<Challenges, ChallengesParseError> {
+    let list = header_map
+        .get_all(PROXY_AUTHENTICATE)
+        .into_iter()
+        .map(|x| Challenges::from_bytes(x.as_bytes()))
+        .collect::<Result<Vec<_>, _>>()?;
+    let list = list.into_iter().flat_map(|x| x.0).collect::<Vec<_>>();
+    Ok(Challenges::new(list))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -153,5 +179,127 @@ mod tests {
         )
         .unwrap();
         assert_eq!(map.get(PROXY_AUTHORIZATION).unwrap(), DEMO_CREDENTIALS_STR);
+    }
+
+    #[cfg(all(feature = "scheme-basic", feature = "scheme-bearer"))]
+    #[test]
+    fn test_get_www_authenticate() {
+        //
+        let mut map = HeaderMap::new();
+        assert!(get_www_authenticate(&map).unwrap().is_empty());
+
+        //
+        map.append(
+            WWW_AUTHENTICATE,
+            r#"Basic realm="foo", charset="UTF-8", Bearer realm="bar", scope="openid profile email""#
+                .parse()
+                .unwrap(),
+        );
+        let c = get_www_authenticate(&map).unwrap();
+        for (i, c) in c.iter().enumerate() {
+            match i {
+                0 => {
+                    let c = c.as_basic().unwrap();
+                    assert_eq!(c.realm, "foo".into());
+                    assert_eq!(c.charset, Some("UTF-8".into()));
+                }
+                1 => {
+                    let c = c.as_bearer().unwrap();
+                    assert_eq!(c.realm, "bar".into());
+                    assert_eq!(c.scope, Some("openid profile email".into()));
+                }
+                i => panic!("{} {:?}", i, c),
+            }
+        }
+
+        //
+        map.clear();
+        map.append(
+            WWW_AUTHENTICATE,
+            r#"Basic realm="foo", charset="UTF-8""#.parse().unwrap(),
+        );
+        map.append(
+            WWW_AUTHENTICATE,
+            r#"Bearer realm="bar", scope="openid profile email""#
+                .parse()
+                .unwrap(),
+        );
+        let c = get_www_authenticate(&map).unwrap();
+        for (i, c) in c.iter().enumerate() {
+            match i {
+                0 => {
+                    let c = c.as_basic().unwrap();
+                    assert_eq!(c.realm, "foo".into());
+                    assert_eq!(c.charset, Some("UTF-8".into()));
+                }
+                1 => {
+                    let c = c.as_bearer().unwrap();
+                    assert_eq!(c.realm, "bar".into());
+                    assert_eq!(c.scope, Some("openid profile email".into()));
+                }
+                i => panic!("{} {:?}", i, c),
+            }
+        }
+    }
+
+    #[cfg(all(feature = "scheme-basic", feature = "scheme-bearer"))]
+    #[test]
+    fn test_get_proxy_authenticate() {
+        //
+        let mut map = HeaderMap::new();
+        assert!(get_proxy_authenticate(&map).unwrap().is_empty());
+
+        //
+        map.append(
+            PROXY_AUTHENTICATE,
+            r#"Basic realm="foo", charset="UTF-8", Bearer realm="bar", scope="openid profile email""#
+                .parse()
+                .unwrap(),
+        );
+        let c = get_proxy_authenticate(&map).unwrap();
+        for (i, c) in c.iter().enumerate() {
+            match i {
+                0 => {
+                    let c = c.as_basic().unwrap();
+                    assert_eq!(c.realm, "foo".into());
+                    assert_eq!(c.charset, Some("UTF-8".into()));
+                }
+                1 => {
+                    let c = c.as_bearer().unwrap();
+                    assert_eq!(c.realm, "bar".into());
+                    assert_eq!(c.scope, Some("openid profile email".into()));
+                }
+                i => panic!("{} {:?}", i, c),
+            }
+        }
+
+        //
+        map.clear();
+        map.append(
+            PROXY_AUTHENTICATE,
+            r#"Basic realm="foo", charset="UTF-8""#.parse().unwrap(),
+        );
+        map.append(
+            PROXY_AUTHENTICATE,
+            r#"Bearer realm="bar", scope="openid profile email""#
+                .parse()
+                .unwrap(),
+        );
+        let c = get_proxy_authenticate(&map).unwrap();
+        for (i, c) in c.iter().enumerate() {
+            match i {
+                0 => {
+                    let c = c.as_basic().unwrap();
+                    assert_eq!(c.realm, "foo".into());
+                    assert_eq!(c.charset, Some("UTF-8".into()));
+                }
+                1 => {
+                    let c = c.as_bearer().unwrap();
+                    assert_eq!(c.realm, "bar".into());
+                    assert_eq!(c.scope, Some("openid profile email".into()));
+                }
+                i => panic!("{} {:?}", i, c),
+            }
+        }
     }
 }

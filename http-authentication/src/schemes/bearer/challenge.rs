@@ -45,8 +45,12 @@ impl TryFrom<&ChallengeRef<'_>> for Challenge {
             .params
             .iter()
             .find(|(k, _)| k.eq_ignore_ascii_case(PARAM_REALM))
-            .map(|(_, v)| v.as_escaped().into())
-            .ok_or(ChallengeParseError::RealmMissing)?;
+            .map(|(_, v)| v.as_escaped().into());
+        //
+        // TODO, Optional
+        // Ref https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#basic
+        //
+        let realm = realm.unwrap_or_default();
 
         let scope = c
             .params
@@ -83,7 +87,6 @@ impl TryFrom<&ChallengeRef<'_>> for Challenge {
 #[derive(Debug)]
 pub enum ChallengeParseError {
     SchemeMismatch,
-    RealmMissing,
     Other(&'static str),
 }
 

@@ -5,6 +5,7 @@ use alloc::{
 };
 use core::{
     fmt,
+    ops::Deref,
     str::{self, FromStr},
 };
 
@@ -18,6 +19,14 @@ use crate::{
 //
 #[derive(Debug, Clone)]
 pub struct Challenges(pub Vec<Challenge>);
+
+impl Deref for Challenges {
+    type Target = Vec<Challenge>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl Challenges {
     pub fn new(inner: Vec<Challenge>) -> Self {
