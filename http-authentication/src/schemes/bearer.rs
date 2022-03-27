@@ -1,7 +1,10 @@
 //! [The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://www.rfc-editor.org/rfc/rfc6750.html)
 
 use alloc::boxed::Box;
-use core::{fmt, str::FromStr};
+use core::{
+    fmt,
+    str::{self, FromStr},
+};
 
 use crate::schemes::{NAME_BEARER as NAME, SP_STR};
 
@@ -21,42 +24,33 @@ impl Credentials {
     }
 
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
-        todo!()
-    }
-}
+        let bytes = bytes.as_ref();
 
-impl fmt::Display for Credentials {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}{}", NAME, SP_STR, self.token)
-    }
-}
-
-impl FromStr for Credentials {
-    type Err = CredentialsParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() < NAME.len() + 1 {
-            return Err(Self::Err::Other("too short"));
+        if bytes.len() < NAME.len() + 1 {
+            return Err(CredentialsParseError::Other("too short"));
         }
 
-        if s[..NAME.len()] != *NAME {
-            return Err(Self::Err::SchemeMismatch);
+        if &bytes[..NAME.len()] != NAME.as_bytes() {
+            return Err(CredentialsParseError::SchemeMismatch);
         }
 
-        if s[NAME.len()..NAME.len() + 1] != *SP_STR {
-            return Err(Self::Err::OneSPMismatch);
+        if &bytes[NAME.len()..NAME.len() + 1] != SP_STR.as_bytes() {
+            return Err(CredentialsParseError::OneSPMismatch);
         }
 
-        let token = &s[NAME.len() + 1..];
+        let param_bytes = &bytes[NAME.len() + 1..];
+        let token = str::from_utf8(param_bytes).map_err(CredentialsParseError::ParamToStrFailed)?;
 
         Ok(Self::new(token))
     }
 }
 
+//
 #[derive(Debug)]
 pub enum CredentialsParseError {
     SchemeMismatch,
     OneSPMismatch,
+    ParamToStrFailed(str::Utf8Error),
     Other(&'static str),
 }
 
@@ -69,6 +63,30 @@ impl fmt::Display for CredentialsParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for CredentialsParseError {}
 
+//
+impl fmt::Display for Credentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}{}", NAME, SP_STR, self.token)
+    }
+}
+
+//
+impl FromStr for Credentials {
+    type Err = CredentialsParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bytes(s.as_bytes())
+    }
+}
+
+//
+//
+//
+#[cfg(test)]
+pub(crate) const DEMO_CREDENTIALS_STR: &str = "Bearer mF_9.B5f-4.1JqM";
+#[cfg(test)]
+pub(crate) const DEMO_CREDENTIALS_TOKEN_STR: &str = "mF_9.B5f-4.1JqM";
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -77,10 +95,9 @@ mod tests {
 
     #[test]
     fn test_credentials_parse_and_render() {
-        let s = "Bearer mF_9.B5f-4.1JqM";
-        let c = s.parse::<Credentials>().unwrap();
-        assert_eq!(c.token, "mF_9.B5f-4.1JqM".into());
-        assert_eq!(c.to_string(), s);
+        let c = DEMO_CREDENTIALS_STR.parse::<Credentials>().unwrap();
+        assert_eq!(c.token, DEMO_CREDENTIALS_TOKEN_STR.into());
+        assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
 
         //
         match Credentials::from_str("Bearer") {

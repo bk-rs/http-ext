@@ -1,4 +1,4 @@
-use alloc::string::String;
+use alloc::vec::Vec;
 use core::{fmt, str::FromStr};
 
 use crate::schemes::{NAME_BASIC, NAME_BEARER, NAME_DIGEST, SP};
@@ -14,7 +14,47 @@ pub enum Credentials {
 
 impl Credentials {
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
-        todo!()
+        let bytes = bytes.as_ref();
+
+        let scheme = bytes
+            .iter()
+            .take_while(|x| **x != SP as u8)
+            .cloned()
+            .collect::<Vec<_>>();
+        match scheme {
+            x if x == NAME_BASIC.as_bytes() => {
+                #[cfg(feature = "scheme-basic")]
+                {
+                    crate::schemes::basic::Credentials::from_bytes(bytes)
+                        .map(Self::Basic)
+                        .map_err(CredentialsParseError::Basic)
+                }
+                #[cfg(not(feature = "scheme-basic"))]
+                {
+                    Err(CredentialsParseError::SchemeUnsupported(
+                        "Require feature scheme-basic",
+                    ))
+                }
+            }
+            x if x == NAME_BEARER.as_bytes() => {
+                #[cfg(feature = "scheme-bearer")]
+                {
+                    crate::schemes::bearer::Credentials::from_bytes(bytes)
+                        .map(Self::Bearer)
+                        .map_err(CredentialsParseError::Bearer)
+                }
+                #[cfg(not(feature = "scheme-bearer"))]
+                {
+                    Err(CredentialsParseError::SchemeUnsupported(
+                        "Require feature scheme-bearer",
+                    ))
+                }
+            }
+            x if x == NAME_DIGEST.as_bytes() => {
+                Err(CredentialsParseError::SchemeUnsupported("Unimplemented"))
+            }
+            _ => Err(CredentialsParseError::SchemeUnknown),
+        }
     }
 }
 
@@ -36,37 +76,7 @@ impl FromStr for Credentials {
     type Err = CredentialsParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let scheme = s.chars().take_while(|x| x != &SP).collect::<String>();
-        match scheme.as_str() {
-            NAME_BASIC => {
-                #[cfg(feature = "scheme-basic")]
-                {
-                    crate::schemes::basic::Credentials::from_str(s)
-                        .map(Self::Basic)
-                        .map_err(Self::Err::Basic)
-                }
-                #[cfg(not(feature = "scheme-basic"))]
-                {
-                    Err(Self::Err::SchemeUnsupported("Require feature scheme-basic"))
-                }
-            }
-            NAME_BEARER => {
-                #[cfg(feature = "scheme-bearer")]
-                {
-                    crate::schemes::bearer::Credentials::from_str(s)
-                        .map(Self::Bearer)
-                        .map_err(Self::Err::Bearer)
-                }
-                #[cfg(not(feature = "scheme-bearer"))]
-                {
-                    Err(Self::Err::SchemeUnsupported(
-                        "Require feature scheme-bearer",
-                    ))
-                }
-            }
-            NAME_DIGEST => Err(Self::Err::SchemeUnsupported("Unimplemented")),
-            _ => Err(Self::Err::SchemeUnknown),
-        }
+        Self::from_bytes(s.as_bytes())
     }
 }
 
@@ -101,20 +111,24 @@ mod tests {
         //
         #[cfg(feature = "scheme-basic")]
         {
-            let s = "Basic YWxhZGRpbjpvcGVuc2VzYW1l";
-            match s.parse::<Credentials>() {
+            match crate::schemes::basic::DEMO_CREDENTIALS_STR.parse::<Credentials>() {
                 Ok(Credentials::Basic(c)) => {
-                    assert_eq!(c.user_id, "aladdin".into());
-                    assert_eq!(c.password, "opensesame".into());
-                    assert_eq!(c.to_string(), s);
+                    assert_eq!(
+                        c.user_id,
+                        crate::schemes::basic::DEMO_CREDENTIALS_USER_ID_STR.into()
+                    );
+                    assert_eq!(
+                        c.password,
+                        crate::schemes::basic::DEMO_CREDENTIALS_PASSWORD_STR.into()
+                    );
+                    assert_eq!(c.to_string(), crate::schemes::basic::DEMO_CREDENTIALS_STR);
                 }
                 x => panic!("{:?}", x),
             }
         }
         #[cfg(not(feature = "scheme-basic"))]
         {
-            let s = "Basic YWxhZGRpbjpvcGVuc2VzYW1l";
-            match s.parse::<Credentials>() {
+            match "Basic bar".parse::<Credentials>() {
                 Err(CredentialsParseError::SchemeUnsupported(_)) => {}
                 x => panic!("{:?}", x),
             }
@@ -123,19 +137,20 @@ mod tests {
         //
         #[cfg(feature = "scheme-bearer")]
         {
-            let s = "Bearer mF_9.B5f-4.1JqM";
-            match s.parse::<Credentials>() {
+            match crate::schemes::bearer::DEMO_CREDENTIALS_STR.parse::<Credentials>() {
                 Ok(Credentials::Bearer(c)) => {
-                    assert_eq!(c.token, "mF_9.B5f-4.1JqM".into());
-                    assert_eq!(c.to_string(), s);
+                    assert_eq!(
+                        c.token,
+                        crate::schemes::bearer::DEMO_CREDENTIALS_TOKEN_STR.into()
+                    );
+                    assert_eq!(c.to_string(), crate::schemes::bearer::DEMO_CREDENTIALS_STR);
                 }
                 x => panic!("{:?}", x),
             }
         }
         #[cfg(not(feature = "scheme-bearer"))]
         {
-            let s = "Bearer mF_9.B5f-4.1JqM";
-            match s.parse::<Credentials>() {
+            match "Bearer bar".parse::<Credentials>() {
                 Err(CredentialsParseError::SchemeUnsupported(_)) => {}
                 x => panic!("{:?}", x),
             }

@@ -1,11 +1,10 @@
 //! [The 'Basic' HTTP Authentication Scheme](https://www.rfc-editor.org/rfc/rfc7617.html)
 
-use alloc::{
-    boxed::Box,
-    format,
-    string::{self, String},
+use alloc::{boxed::Box, format};
+use core::{
+    fmt,
+    str::{self, FromStr},
 };
-use core::{fmt, str::FromStr};
 
 use crate::schemes::{NAME_BASIC as NAME, SP_STR};
 
@@ -30,63 +29,52 @@ impl Credentials {
     }
 
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
-        todo!()
-    }
-}
+        let bytes = bytes.as_ref();
 
-impl fmt::Display for Credentials {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}{}{}",
-            NAME,
-            SP_STR,
-            base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
-        )
-    }
-}
-
-impl FromStr for Credentials {
-    type Err = CredentialsParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() < NAME.len() + 1 {
-            return Err(Self::Err::Other("too short"));
+        if bytes.len() < NAME.len() + 1 {
+            return Err(CredentialsParseError::Other("too short"));
         }
 
-        if s[..NAME.len()] != *NAME {
-            return Err(Self::Err::SchemeMismatch);
+        if &bytes[..NAME.len()] != NAME.as_bytes() {
+            return Err(CredentialsParseError::SchemeMismatch);
         }
 
-        if s[NAME.len()..NAME.len() + 1] != *SP_STR {
-            return Err(Self::Err::OneSPMismatch);
+        if &bytes[NAME.len()..NAME.len() + 1] != SP_STR.as_bytes() {
+            return Err(CredentialsParseError::OneSPMismatch);
         }
 
-        let param_bytes =
-            base64::decode(&s[NAME.len() + 1..]).map_err(Self::Err::ParamBase64DecodeFailed)?;
+        let param_bytes = base64::decode(&bytes[NAME.len() + 1..])
+            .map_err(CredentialsParseError::ParamBase64DecodeFailed)?;
 
-        let param_str = String::from_utf8(param_bytes)
-            .map_err(Self::Err::ParamBase64DecodedBytesToUtf8Failed)?;
-
-        let mut split = param_str.split(COLON);
-        let user_id = split.next().ok_or(Self::Err::ParamUserIdMissing)?;
-        let password = split.next().ok_or(Self::Err::ParamPasswordMissing)?;
+        let mut split = param_bytes.split(|x| *x == COLON as u8);
+        let user_id = split
+            .next()
+            .ok_or(CredentialsParseError::ParamUserIdMissing)?;
+        let user_id =
+            str::from_utf8(user_id).map_err(CredentialsParseError::ParamUserIdToStrFailed)?;
+        let password = split
+            .next()
+            .ok_or(CredentialsParseError::ParamPasswordMissing)?;
+        let password =
+            str::from_utf8(password).map_err(CredentialsParseError::ParamPasswordToStrFailed)?;
         if split.next().is_some() {
-            return Err(Self::Err::ParamPairsMismatch);
+            return Err(CredentialsParseError::ParamPairsMismatch);
         }
 
         Ok(Self::new(user_id, password))
     }
 }
 
+//
 #[derive(Debug)]
 pub enum CredentialsParseError {
     SchemeMismatch,
     OneSPMismatch,
     ParamBase64DecodeFailed(base64::DecodeError),
-    ParamBase64DecodedBytesToUtf8Failed(string::FromUtf8Error),
     ParamUserIdMissing,
+    ParamUserIdToStrFailed(str::Utf8Error),
     ParamPasswordMissing,
+    ParamPasswordToStrFailed(str::Utf8Error),
     ParamPairsMismatch,
     Other(&'static str),
 }
@@ -100,6 +88,38 @@ impl fmt::Display for CredentialsParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for CredentialsParseError {}
 
+//
+impl fmt::Display for Credentials {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}{}{}",
+            NAME,
+            SP_STR,
+            base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
+        )
+    }
+}
+
+//
+impl FromStr for Credentials {
+    type Err = CredentialsParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_bytes(s.as_bytes())
+    }
+}
+
+//
+//
+//
+#[cfg(test)]
+pub(crate) const DEMO_CREDENTIALS_STR: &str = "Basic YWxhZGRpbjpvcGVuc2VzYW1l";
+#[cfg(test)]
+pub(crate) const DEMO_CREDENTIALS_USER_ID_STR: &str = "aladdin";
+#[cfg(test)]
+pub(crate) const DEMO_CREDENTIALS_PASSWORD_STR: &str = "opensesame";
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -108,11 +128,10 @@ mod tests {
 
     #[test]
     fn test_credentials_parse_and_render() {
-        let s = "Basic YWxhZGRpbjpvcGVuc2VzYW1l";
-        let c = s.parse::<Credentials>().unwrap();
-        assert_eq!(c.user_id, "aladdin".into());
-        assert_eq!(c.password, "opensesame".into());
-        assert_eq!(c.to_string(), s);
+        let c = DEMO_CREDENTIALS_STR.parse::<Credentials>().unwrap();
+        assert_eq!(c.user_id, DEMO_CREDENTIALS_USER_ID_STR.into());
+        assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
+        assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
 
         //
         match Credentials::from_str("Basic") {
