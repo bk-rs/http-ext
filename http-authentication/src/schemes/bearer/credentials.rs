@@ -92,7 +92,7 @@ mod tests {
     use alloc::string::ToString as _;
 
     #[test]
-    fn test_credentials_parse_and_render() {
+    fn test_parse_and_render() {
         let c = DEMO_CREDENTIALS_STR.parse::<Credentials>().unwrap();
         assert_eq!(c.token, DEMO_CREDENTIALS_TOKEN_STR.into());
         assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);

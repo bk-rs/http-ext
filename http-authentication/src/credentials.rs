@@ -16,16 +16,37 @@ pub enum Credentials {
 }
 
 impl Credentials {
+    //
     #[cfg(feature = "scheme-basic")]
     pub fn basic(user_id: impl AsRef<str>, password: impl AsRef<str>) -> Self {
         Self::Basic(crate::schemes::basic::Credentials::new(user_id, password))
     }
 
+    #[cfg(feature = "scheme-basic")]
+    pub fn as_basic(&self) -> Option<&crate::schemes::basic::Credentials> {
+        match self {
+            Self::Basic(c) => Some(c),
+            #[allow(unreachable_patterns)]
+            _ => None,
+        }
+    }
+
+    //
     #[cfg(feature = "scheme-bearer")]
     pub fn bearer(token: impl AsRef<str>) -> Self {
         Self::Bearer(crate::schemes::bearer::Credentials::new(token))
     }
 
+    #[cfg(feature = "scheme-bearer")]
+    pub fn as_bearer(&self) -> Option<&crate::schemes::bearer::Credentials> {
+        match self {
+            Self::Bearer(c) => Some(c),
+            #[allow(unreachable_patterns)]
+            _ => None,
+        }
+    }
+
+    //
     pub fn from_bytes(bytes: impl AsRef<[u8]>) -> Result<Self, CredentialsParseError> {
         let bytes = bytes.as_ref();
 
@@ -123,7 +144,7 @@ mod tests {
     use alloc::string::ToString as _;
 
     #[test]
-    fn test_credentials_parse_and_render() {
+    fn test_parse_and_render() {
         //
         #[cfg(feature = "scheme-basic")]
         {
@@ -132,7 +153,8 @@ mod tests {
             };
 
             match DEMO_CREDENTIALS_STR.parse::<Credentials>() {
-                Ok(Credentials::Basic(c)) => {
+                Ok(c) => {
+                    let c = c.as_basic().unwrap();
                     assert_eq!(c.user_id, DEMO_CREDENTIALS_USER_ID_STR.into());
                     assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
                     assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
@@ -154,7 +176,8 @@ mod tests {
             use crate::schemes::bearer::{DEMO_CREDENTIALS_STR, DEMO_CREDENTIALS_TOKEN_STR};
 
             match DEMO_CREDENTIALS_STR.parse::<Credentials>() {
-                Ok(Credentials::Bearer(c)) => {
+                Ok(c) => {
+                    let c = c.as_bearer().unwrap();
                     assert_eq!(c.token, DEMO_CREDENTIALS_TOKEN_STR.into());
                     assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
                 }

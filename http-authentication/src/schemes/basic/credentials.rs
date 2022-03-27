@@ -39,10 +39,12 @@ impl Credentials {
             return Err(CredentialsParseError::OneSPMismatch);
         }
 
-        let token68_bytes = base64::decode(&bytes[NAME.len() + 1..])
-            .map_err(CredentialsParseError::Token68DecodeFailed)?;
+        let token68_bytes = &bytes[NAME.len() + 1..];
 
-        let mut token68_split = token68_bytes.split(|x| *x == COLON as u8);
+        let token68_b64_decoded_bytes =
+            base64::decode(token68_bytes).map_err(CredentialsParseError::Token68DecodeFailed)?;
+
+        let mut token68_split = token68_b64_decoded_bytes.split(|x| *x == COLON as u8);
         let user_id = token68_split
             .next()
             .ok_or(CredentialsParseError::UserIdMissing)?;
@@ -122,7 +124,7 @@ mod tests {
     use alloc::string::ToString as _;
 
     #[test]
-    fn test_credentials_parse_and_render() {
+    fn test_parse_and_render() {
         let c = DEMO_CREDENTIALS_STR.parse::<Credentials>().unwrap();
         assert_eq!(c.user_id, DEMO_CREDENTIALS_USER_ID_STR.into());
         assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
