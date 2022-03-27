@@ -5,8 +5,6 @@
 extern crate alloc;
 
 //
-#[allow(dead_code)]
-pub(crate) const SP_STR: &str = " ";
 pub(crate) const SP: char = ' ';
 #[allow(dead_code)]
 pub(crate) const CHALLENGE_PARAM_REALM: &str = "realm";

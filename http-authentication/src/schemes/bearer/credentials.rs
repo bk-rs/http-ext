@@ -4,7 +4,7 @@ use core::{
     str::{self, FromStr},
 };
 
-use crate::{schemes::NAME_BEARER as NAME, SP_STR};
+use crate::{schemes::NAME_BEARER as NAME, SP};
 
 //
 #[derive(Debug, Clone)]
@@ -30,7 +30,7 @@ impl Credentials {
             return Err(CredentialsParseError::SchemeMismatch);
         }
 
-        if &bytes[NAME.len()..NAME.len() + 1] != SP_STR.as_bytes() {
+        if bytes[NAME.len()..NAME.len() + 1] != [SP as u8] {
             return Err(CredentialsParseError::OneSPMismatch);
         }
 
@@ -43,7 +43,7 @@ impl Credentials {
     }
 
     fn internal_to_string(&self) -> String {
-        format!("{}{}{}", NAME, SP_STR, self.token)
+        format!("{}{}{}", NAME, SP, self.token)
     }
 }
 

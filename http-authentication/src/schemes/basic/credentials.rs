@@ -4,7 +4,7 @@ use core::{
     str::{self, FromStr},
 };
 
-use crate::{schemes::NAME_BASIC as NAME, SP_STR};
+use crate::{schemes::NAME_BASIC as NAME, SP};
 
 //
 const COLON: char = ':';
@@ -35,7 +35,7 @@ impl Credentials {
             return Err(CredentialsParseError::SchemeMismatch);
         }
 
-        if &bytes[NAME.len()..NAME.len() + 1] != SP_STR.as_bytes() {
+        if bytes[NAME.len()..NAME.len() + 1] != [SP as u8] {
             return Err(CredentialsParseError::OneSPMismatch);
         }
 
@@ -65,7 +65,7 @@ impl Credentials {
         format!(
             "{}{}{}",
             NAME,
-            SP_STR,
+            SP,
             base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
         )
     }
