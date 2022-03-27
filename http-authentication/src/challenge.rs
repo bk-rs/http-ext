@@ -1,3 +1,5 @@
+use core::fmt;
+
 //
 #[derive(Debug, Clone)]
 pub enum Challenge {
@@ -35,6 +37,21 @@ impl Challenge {
             Self::Bearer(c) => Some(c),
             #[allow(unreachable_patterns)]
             _ => None,
+        }
+    }
+}
+
+//
+#[allow(unused_variables)]
+impl fmt::Display for Challenge {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            #[cfg(feature = "scheme-basic")]
+            Self::Basic(c) => c.fmt(f),
+            #[cfg(feature = "scheme-bearer")]
+            Self::Bearer(c) => c.fmt(f),
+            #[allow(unreachable_patterns)]
+            _ => unimplemented!(),
         }
     }
 }

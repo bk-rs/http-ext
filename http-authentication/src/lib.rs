@@ -10,6 +10,12 @@ pub(crate) const SP_STR: &str = " ";
 pub(crate) const SP: char = ' ';
 #[allow(dead_code)]
 pub(crate) const CHALLENGE_PARAM_REALM: &str = "realm";
+#[allow(dead_code)]
+pub(crate) const COMMA: char = ',';
+#[allow(dead_code)]
+pub(crate) const EQ_S: char = '=';
+#[allow(dead_code)]
+pub(crate) const D_Q_M: char = '"';
 
 //
 pub mod challenge;

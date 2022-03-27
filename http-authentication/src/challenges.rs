@@ -1,4 +1,5 @@
 use alloc::{
+    format,
     string::{String, ToString as _},
     vec,
     vec::Vec,
@@ -14,6 +15,7 @@ use http_auth::ChallengeParser;
 use crate::{
     challenge::Challenge,
     schemes::{NAME_BASIC, NAME_BEARER, NAME_DIGEST},
+    COMMA, SP,
 };
 
 //
@@ -118,6 +120,19 @@ impl fmt::Display for ChallengesParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for ChallengesParseError {}
 
+impl fmt::Display for Challenges {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<_>>()
+                .join(format!("{}{}", COMMA, SP).as_str())
+        )
+    }
+}
+
 //
 impl FromStr for Challenges {
     type Err = ChallengesParseError;
@@ -148,7 +163,7 @@ mod tests {
                     let c = c.as_basic().unwrap();
                     assert_eq!(c.realm, DEMO_CHALLENGE_REALM_STR.into());
                     assert_eq!(c.charset, Some(DEMO_CHALLENGE_CHARSET_STR.into()));
-                    // TODO, to_string
+                    assert_eq!(c.to_string(), DEMO_CHALLENGE_STR);
                 }
                 x => panic!("{:?}", x),
             }
@@ -160,7 +175,7 @@ mod tests {
                     let c = c.as_basic().unwrap();
                     assert_eq!(c.realm, DEMO_CHALLENGE_REALM_STR.into());
                     assert_eq!(c.charset, None);
-                    // TODO, to_string
+                    assert_eq!(c.to_string(), DEMO_CHALLENGE_STR_SIMPLE);
                 }
                 x => panic!("{:?}", x),
             }
@@ -194,7 +209,7 @@ mod tests {
                         Some(DEMO_CHALLENGE_ERROR_DESCRIPTION_STR.into())
                     );
                     assert_eq!(c.error_uri, None);
-                    // TODO, to_string
+                    assert_eq!(c.to_string(), DEMO_CHALLENGE_STR);
                 }
                 x => panic!("{:?}", x),
             }
@@ -209,7 +224,7 @@ mod tests {
                     assert_eq!(c.error, None);
                     assert_eq!(c.error_description, None);
                     assert_eq!(c.error_uri, None);
-                    // TODO, to_string
+                    assert_eq!(c.to_string(), DEMO_CHALLENGE_STR_SIMPLE);
                 }
                 x => panic!("{:?}", x),
             }
@@ -218,6 +233,38 @@ mod tests {
         {
             match "Bearer".parse::<Challenges>() {
                 Err(ChallengesParseError::SchemeUnsupported(_)) => {}
+                x => panic!("{:?}", x),
+            }
+        }
+
+        #[cfg(all(feature = "scheme-basic", feature = "scheme-bearer"))]
+        {
+            use crate::schemes::{basic, bearer};
+
+            let s = format!(
+                "{}, {}",
+                basic::DEMO_CHALLENGE_STR_SIMPLE,
+                bearer::DEMO_CHALLENGE_STR_SIMPLE
+            );
+
+            match s.parse::<Challenges>() {
+                Ok(c) => {
+                    for (i, c) in c.iter().enumerate() {
+                        match i {
+                            0 => {
+                                let c = c.as_basic().unwrap();
+                                assert_eq!(c.realm, basic::DEMO_CHALLENGE_REALM_STR.into());
+                            }
+                            1 => {
+                                let c = c.as_bearer().unwrap();
+                                assert_eq!(c.realm, bearer::DEMO_CHALLENGE_REALM_STR.into());
+                            }
+                            i => panic!("{} {:?}", i, c),
+                        }
+                    }
+
+                    assert_eq!(c.to_string(), s);
+                }
                 x => panic!("{:?}", x),
             }
         }

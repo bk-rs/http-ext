@@ -1,4 +1,4 @@
-use alloc::boxed::Box;
+use alloc::{boxed::Box, format, string::String};
 use core::{
     fmt,
     str::{self, FromStr},
@@ -41,6 +41,10 @@ impl Credentials {
 
         Ok(Self::new(token))
     }
+
+    fn internal_to_string(&self) -> String {
+        format!("{}{}{}", NAME, SP_STR, self.token)
+    }
 }
 
 //
@@ -64,7 +68,7 @@ impl std::error::Error for CredentialsParseError {}
 //
 impl fmt::Display for Credentials {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}{}{}", NAME, SP_STR, self.token)
+        write!(f, "{}", self.internal_to_string())
     }
 }
 

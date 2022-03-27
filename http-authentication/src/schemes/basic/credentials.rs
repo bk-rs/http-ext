@@ -1,4 +1,4 @@
-use alloc::{boxed::Box, format};
+use alloc::{boxed::Box, format, string::String};
 use core::{
     fmt,
     str::{self, FromStr},
@@ -60,6 +60,15 @@ impl Credentials {
 
         Ok(Self::new(user_id, password))
     }
+
+    fn internal_to_string(&self) -> String {
+        format!(
+            "{}{}{}",
+            NAME,
+            SP_STR,
+            base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
+        )
+    }
 }
 
 //
@@ -88,13 +97,7 @@ impl std::error::Error for CredentialsParseError {}
 //
 impl fmt::Display for Credentials {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}{}{}",
-            NAME,
-            SP_STR,
-            base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
-        )
+        write!(f, "{}", self.internal_to_string())
     }
 }
 
