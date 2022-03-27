@@ -1,15 +1,11 @@
-//! [The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://www.rfc-editor.org/rfc/rfc6750.html)
-
 use alloc::boxed::Box;
 use core::{
     fmt,
     str::{self, FromStr},
 };
 
-use crate::schemes::{NAME_BEARER as NAME, SP_STR};
+use crate::{schemes::NAME_BEARER as NAME, SP_STR};
 
-//
-//
 //
 #[derive(Debug, Clone)]
 pub struct Credentials {
@@ -30,7 +26,7 @@ impl Credentials {
             return Err(CredentialsParseError::Other("too short"));
         }
 
-        if &bytes[..NAME.len()] != NAME.as_bytes() {
+        if !&bytes[..NAME.len()].eq_ignore_ascii_case(NAME.as_bytes()) {
             return Err(CredentialsParseError::SchemeMismatch);
         }
 

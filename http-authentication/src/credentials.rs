@@ -1,7 +1,10 @@
 use alloc::vec::Vec;
 use core::{fmt, str::FromStr};
 
-use crate::schemes::{NAME_BASIC, NAME_BEARER, NAME_DIGEST, SP};
+use crate::{
+    schemes::{NAME_BASIC, NAME_BEARER, NAME_DIGEST},
+    SP,
+};
 
 //
 #[derive(Debug, Clone)]
@@ -32,7 +35,7 @@ impl Credentials {
             .cloned()
             .collect::<Vec<_>>();
         match scheme {
-            x if x == NAME_BASIC.as_bytes() => {
+            x if x.eq_ignore_ascii_case(NAME_BASIC.as_bytes()) => {
                 #[cfg(feature = "scheme-basic")]
                 {
                     crate::schemes::basic::Credentials::from_bytes(bytes)
@@ -46,7 +49,7 @@ impl Credentials {
                     ))
                 }
             }
-            x if x == NAME_BEARER.as_bytes() => {
+            x if x.eq_ignore_ascii_case(NAME_BEARER.as_bytes()) => {
                 #[cfg(feature = "scheme-bearer")]
                 {
                     crate::schemes::bearer::Credentials::from_bytes(bytes)
@@ -60,7 +63,7 @@ impl Credentials {
                     ))
                 }
             }
-            x if x == NAME_DIGEST.as_bytes() => {
+            x if x.eq_ignore_ascii_case(NAME_DIGEST.as_bytes()) => {
                 Err(CredentialsParseError::SchemeUnsupported("Unimplemented"))
             }
             _ => Err(CredentialsParseError::SchemeUnknown),

@@ -1,18 +1,14 @@
-//! [The 'Basic' HTTP Authentication Scheme](https://www.rfc-editor.org/rfc/rfc7617.html)
-
 use alloc::{boxed::Box, format};
 use core::{
     fmt,
     str::{self, FromStr},
 };
 
-use crate::schemes::{NAME_BASIC as NAME, SP_STR};
+use crate::{schemes::NAME_BASIC as NAME, SP_STR};
 
 //
 const COLON: char = ':';
 
-//
-//
 //
 #[derive(Debug, Clone)]
 pub struct Credentials {
@@ -35,7 +31,7 @@ impl Credentials {
             return Err(CredentialsParseError::Other("too short"));
         }
 
-        if &bytes[..NAME.len()] != NAME.as_bytes() {
+        if !&bytes[..NAME.len()].eq_ignore_ascii_case(NAME.as_bytes()) {
             return Err(CredentialsParseError::SchemeMismatch);
         }
 
