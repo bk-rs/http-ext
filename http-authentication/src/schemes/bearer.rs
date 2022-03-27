@@ -38,8 +38,10 @@ impl Credentials {
             return Err(CredentialsParseError::OneSPMismatch);
         }
 
-        let param_bytes = &bytes[NAME.len() + 1..];
-        let token = str::from_utf8(param_bytes).map_err(CredentialsParseError::ParamToStrFailed)?;
+        let token68_bytes = &bytes[NAME.len() + 1..];
+
+        let token = token68_bytes;
+        let token = str::from_utf8(token).map_err(CredentialsParseError::TokenToStrFailed)?;
 
         Ok(Self::new(token))
     }
@@ -50,7 +52,7 @@ impl Credentials {
 pub enum CredentialsParseError {
     SchemeMismatch,
     OneSPMismatch,
-    ParamToStrFailed(str::Utf8Error),
+    TokenToStrFailed(str::Utf8Error),
     Other(&'static str),
 }
 

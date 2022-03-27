@@ -43,22 +43,21 @@ impl Credentials {
             return Err(CredentialsParseError::OneSPMismatch);
         }
 
-        let param_bytes = base64::decode(&bytes[NAME.len() + 1..])
-            .map_err(CredentialsParseError::ParamBase64DecodeFailed)?;
+        let token68_bytes = base64::decode(&bytes[NAME.len() + 1..])
+            .map_err(CredentialsParseError::Token68DecodeFailed)?;
 
-        let mut split = param_bytes.split(|x| *x == COLON as u8);
-        let user_id = split
+        let mut token68_split = token68_bytes.split(|x| *x == COLON as u8);
+        let user_id = token68_split
             .next()
-            .ok_or(CredentialsParseError::ParamUserIdMissing)?;
-        let user_id =
-            str::from_utf8(user_id).map_err(CredentialsParseError::ParamUserIdToStrFailed)?;
-        let password = split
+            .ok_or(CredentialsParseError::UserIdMissing)?;
+        let user_id = str::from_utf8(user_id).map_err(CredentialsParseError::UserIdToStrFailed)?;
+        let password = token68_split
             .next()
-            .ok_or(CredentialsParseError::ParamPasswordMissing)?;
+            .ok_or(CredentialsParseError::PasswordMissing)?;
         let password =
-            str::from_utf8(password).map_err(CredentialsParseError::ParamPasswordToStrFailed)?;
-        if split.next().is_some() {
-            return Err(CredentialsParseError::ParamPairsMismatch);
+            str::from_utf8(password).map_err(CredentialsParseError::PasswordToStrFailed)?;
+        if token68_split.next().is_some() {
+            return Err(CredentialsParseError::Token68PairsMismatch);
         }
 
         Ok(Self::new(user_id, password))
@@ -70,12 +69,12 @@ impl Credentials {
 pub enum CredentialsParseError {
     SchemeMismatch,
     OneSPMismatch,
-    ParamBase64DecodeFailed(base64::DecodeError),
-    ParamUserIdMissing,
-    ParamUserIdToStrFailed(str::Utf8Error),
-    ParamPasswordMissing,
-    ParamPasswordToStrFailed(str::Utf8Error),
-    ParamPairsMismatch,
+    Token68DecodeFailed(base64::DecodeError),
+    UserIdMissing,
+    UserIdToStrFailed(str::Utf8Error),
+    PasswordMissing,
+    PasswordToStrFailed(str::Utf8Error),
+    Token68PairsMismatch,
     Other(&'static str),
 }
 
@@ -152,7 +151,7 @@ mod tests {
         }
 
         match Credentials::from_str("Basic dGVzdDoxMjM6Zm9v") {
-            Err(CredentialsParseError::ParamPairsMismatch) => {}
+            Err(CredentialsParseError::Token68PairsMismatch) => {}
             x => panic!("{:?}", x),
         }
     }
