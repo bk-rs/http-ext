@@ -19,6 +19,15 @@ pub fn get_authorization(
         .map(|x| Credentials::from_bytes(x.as_bytes()))
 }
 
+pub fn get_proxy_authorization(
+    header_map: &HeaderMap,
+) -> Option<Result<Credentials, CredentialsParseError>> {
+    header_map
+        .get(PROXY_AUTHORIZATION)
+        .map(|x| Credentials::from_bytes(x.as_bytes()))
+}
+
+//
 #[cfg(feature = "scheme-basic")]
 pub fn set_authorization_with_basic(
     header_map: &mut HeaderMap,
@@ -35,32 +44,6 @@ pub fn set_authorization_with_basic(
     Ok(())
 }
 
-#[cfg(feature = "scheme-bearer")]
-pub fn set_authorization_with_bearer(
-    header_map: &mut HeaderMap,
-    token: impl AsRef<str>,
-) -> Result<(), http::header::InvalidHeaderValue> {
-    use alloc::string::ToString as _;
-
-    header_map.remove(AUTHORIZATION);
-    header_map.append(
-        AUTHORIZATION,
-        http::HeaderValue::from_str(Credentials::bearer(token).to_string().as_str())?,
-    );
-    Ok(())
-}
-
-//
-//
-//
-pub fn get_proxy_authorization(
-    header_map: &HeaderMap,
-) -> Option<Result<Credentials, CredentialsParseError>> {
-    header_map
-        .get(PROXY_AUTHORIZATION)
-        .map(|x| Credentials::from_bytes(x.as_bytes()))
-}
-
 #[cfg(feature = "scheme-basic")]
 pub fn set_proxy_authorization_with_basic(
     header_map: &mut HeaderMap,
@@ -73,6 +56,22 @@ pub fn set_proxy_authorization_with_basic(
     header_map.append(
         PROXY_AUTHORIZATION,
         http::HeaderValue::from_str(Credentials::basic(user_id, password).to_string().as_str())?,
+    );
+    Ok(())
+}
+
+//
+#[cfg(feature = "scheme-bearer")]
+pub fn set_authorization_with_bearer(
+    header_map: &mut HeaderMap,
+    token: impl AsRef<str>,
+) -> Result<(), http::header::InvalidHeaderValue> {
+    use alloc::string::ToString as _;
+
+    header_map.remove(AUTHORIZATION);
+    header_map.append(
+        AUTHORIZATION,
+        http::HeaderValue::from_str(Credentials::bearer(token).to_string().as_str())?,
     );
     Ok(())
 }
@@ -113,6 +112,33 @@ pub fn get_proxy_authenticate(header_map: &HeaderMap) -> Result<Challenges, Chal
         .collect::<Result<Vec<_>, _>>()?;
     let list = list.into_iter().flat_map(|x| x.0).collect::<Vec<_>>();
     Ok(Challenges::new(list))
+}
+
+//
+pub fn append_www_authenticate(
+    header_map: &mut HeaderMap,
+    challenges: Challenges,
+) -> Result<(), http::header::InvalidHeaderValue> {
+    use alloc::string::ToString as _;
+
+    header_map.append(
+        WWW_AUTHENTICATE,
+        http::HeaderValue::from_str(challenges.to_string().as_str())?,
+    );
+    Ok(())
+}
+
+pub fn append_proxy_authenticate(
+    header_map: &mut HeaderMap,
+    challenges: Challenges,
+) -> Result<(), http::header::InvalidHeaderValue> {
+    use alloc::string::ToString as _;
+
+    header_map.append(
+        PROXY_AUTHENTICATE,
+        http::HeaderValue::from_str(challenges.to_string().as_str())?,
+    );
+    Ok(())
 }
 
 #[cfg(test)]
@@ -183,7 +209,9 @@ mod tests {
 
     #[cfg(all(feature = "scheme-basic", feature = "scheme-bearer"))]
     #[test]
-    fn test_get_www_authenticate() {
+    fn test_get_append_www_authenticate() {
+        use alloc::vec;
+
         //
         let mut map = HeaderMap::new();
         assert!(get_www_authenticate(&map).unwrap().is_empty());
@@ -240,11 +268,30 @@ mod tests {
                 i => panic!("{} {:?}", i, c),
             }
         }
+
+        //
+        map.clear();
+        append_www_authenticate(
+            &mut map,
+            Challenges::new(vec![
+                crate::schemes::basic::Challenge::new("foo").into(),
+                crate::schemes::bearer::Challenge::new("bar").into(),
+            ]),
+        )
+        .unwrap();
+        let list = map
+            .get_all(WWW_AUTHENTICATE)
+            .into_iter()
+            .collect::<Vec<_>>();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0], r#"Basic realm="foo", Bearer realm="bar""#);
     }
 
     #[cfg(all(feature = "scheme-basic", feature = "scheme-bearer"))]
     #[test]
-    fn test_get_proxy_authenticate() {
+    fn test_get_append_proxy_authenticate() {
+        use alloc::vec;
+
         //
         let mut map = HeaderMap::new();
         assert!(get_proxy_authenticate(&map).unwrap().is_empty());
@@ -301,5 +348,22 @@ mod tests {
                 i => panic!("{} {:?}", i, c),
             }
         }
+
+        //
+        map.clear();
+        append_proxy_authenticate(
+            &mut map,
+            Challenges::new(vec![
+                crate::schemes::basic::Challenge::new("foo").into(),
+                crate::schemes::bearer::Challenge::new("bar").into(),
+            ]),
+        )
+        .unwrap();
+        let list = map
+            .get_all(PROXY_AUTHENTICATE)
+            .into_iter()
+            .collect::<Vec<_>>();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0], r#"Basic realm="foo", Bearer realm="bar""#);
     }
 }

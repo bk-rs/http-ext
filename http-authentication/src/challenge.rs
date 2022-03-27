@@ -41,6 +41,20 @@ impl Challenge {
     }
 }
 
+#[cfg(feature = "scheme-basic")]
+impl From<crate::schemes::basic::Challenge> for Challenge {
+    fn from(c: crate::schemes::basic::Challenge) -> Self {
+        Self::basic(c)
+    }
+}
+
+#[cfg(feature = "scheme-bearer")]
+impl From<crate::schemes::bearer::Challenge> for Challenge {
+    fn from(c: crate::schemes::bearer::Challenge) -> Self {
+        Self::bearer(c)
+    }
+}
+
 //
 #[allow(unused_variables)]
 impl fmt::Display for Challenge {
