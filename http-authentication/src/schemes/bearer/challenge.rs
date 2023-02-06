@@ -1,5 +1,4 @@
 use alloc::{boxed::Box, string::String, vec};
-use core::fmt;
 
 use http_auth::ChallengeRef;
 
@@ -134,8 +133,8 @@ pub enum ChallengeParseError {
     Other(&'static str),
 }
 
-impl fmt::Display for ChallengeParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for ChallengeParseError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{self:?}")
     }
 }
@@ -144,8 +143,8 @@ impl fmt::Display for ChallengeParseError {
 impl std::error::Error for ChallengeParseError {}
 
 //
-impl fmt::Display for Challenge {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Challenge {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.internal_to_string())
     }
 }

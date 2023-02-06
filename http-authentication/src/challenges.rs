@@ -5,7 +5,6 @@ use alloc::{
     vec::Vec,
 };
 use core::{
-    fmt,
     ops::Deref,
     str::{self, FromStr},
 };
@@ -111,8 +110,8 @@ pub enum ChallengesParseError {
     Other(&'static str),
 }
 
-impl fmt::Display for ChallengesParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for ChallengesParseError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{self:?}")
     }
 }
@@ -120,8 +119,8 @@ impl fmt::Display for ChallengesParseError {
 #[cfg(feature = "std")]
 impl std::error::Error for ChallengesParseError {}
 
-impl fmt::Display for Challenges {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Challenges {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", ChallengesWithSlice(self.0.as_ref()))
     }
 }
@@ -148,8 +147,8 @@ impl<'a> ChallengesWithSlice<'a> {
 }
 
 //
-impl fmt::Display for ChallengesWithSlice<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for ChallengesWithSlice<'_> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(
             f,
             "{}",

@@ -1,8 +1,5 @@
 use alloc::{boxed::Box, format, string::String};
-use core::{
-    fmt,
-    str::{self, FromStr},
-};
+use core::str::{self, FromStr};
 
 use base64::{engine::general_purpose, Engine as _};
 
@@ -86,8 +83,8 @@ pub enum CredentialsParseError {
     Other(&'static str),
 }
 
-impl fmt::Display for CredentialsParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for CredentialsParseError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{self:?}")
     }
 }
@@ -96,8 +93,8 @@ impl fmt::Display for CredentialsParseError {
 impl std::error::Error for CredentialsParseError {}
 
 //
-impl fmt::Display for Credentials {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Credentials {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.internal_to_string())
     }
 }

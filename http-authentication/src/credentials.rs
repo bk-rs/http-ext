@@ -1,5 +1,5 @@
 use alloc::vec::Vec;
-use core::{fmt, str::FromStr};
+use core::str::FromStr;
 
 use crate::{
     schemes::{NAME_BASIC, NAME_BEARER, NAME_DIGEST},
@@ -103,8 +103,8 @@ pub enum CredentialsParseError {
     SchemeUnsupported(&'static str),
 }
 
-impl fmt::Display for CredentialsParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for CredentialsParseError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{self:?}")
     }
 }
@@ -114,8 +114,8 @@ impl std::error::Error for CredentialsParseError {}
 
 //
 #[allow(unused_variables)]
-impl fmt::Display for Credentials {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Credentials {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             #[cfg(feature = "scheme-basic")]
             Self::Basic(c) => c.fmt(f),

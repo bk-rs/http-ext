@@ -1,5 +1,3 @@
-use core::fmt;
-
 //
 #[derive(Debug, Clone)]
 pub enum Challenge {
@@ -57,8 +55,8 @@ impl From<crate::schemes::bearer::Challenge> for Challenge {
 
 //
 #[allow(unused_variables)]
-impl fmt::Display for Challenge {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Challenge {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             #[cfg(feature = "scheme-basic")]
             Self::Basic(c) => c.fmt(f),
