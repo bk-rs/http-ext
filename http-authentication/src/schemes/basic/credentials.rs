@@ -4,6 +4,8 @@ use core::{
     str::{self, FromStr},
 };
 
+use base64::{engine::general_purpose, Engine as _};
+
 use crate::{schemes::NAME_BASIC as NAME, SP};
 
 //
@@ -41,8 +43,9 @@ impl Credentials {
 
         let token68_bytes = &bytes[NAME.len() + 1..];
 
-        let token68_b64_decoded_bytes =
-            base64::decode(token68_bytes).map_err(CredentialsParseError::Token68DecodeFailed)?;
+        let token68_b64_decoded_bytes = general_purpose::STANDARD
+            .decode(token68_bytes)
+            .map_err(CredentialsParseError::Token68DecodeFailed)?;
 
         let mut token68_split = token68_b64_decoded_bytes.split(|x| *x == COLON as u8);
         let user_id = token68_split
@@ -63,10 +66,8 @@ impl Credentials {
 
     fn internal_to_string(&self) -> String {
         format!(
-            "{}{}{}",
-            NAME,
-            SP,
-            base64::encode(format!("{}{}{}", self.user_id, COLON, self.password))
+            "{NAME}{SP}{}",
+            general_purpose::STANDARD.encode(format!("{}{COLON}{}", self.user_id, self.password))
         )
     }
 }

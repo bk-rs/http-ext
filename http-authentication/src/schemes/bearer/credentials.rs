@@ -43,7 +43,7 @@ impl Credentials {
     }
 
     fn internal_to_string(&self) -> String {
-        format!("{}{}{}", NAME, SP, self.token)
+        format!("{NAME}{SP}{}", self.token)
     }
 }
 
