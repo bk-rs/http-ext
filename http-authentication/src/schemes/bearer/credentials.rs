@@ -58,7 +58,7 @@ pub enum CredentialsParseError {
 
 impl fmt::Display for CredentialsParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -106,17 +106,17 @@ mod tests {
             Err(CredentialsParseError::Other(err)) => {
                 assert_eq!(err, "too short")
             }
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
 
         match Credentials::from_str("MyScheme ") {
             Err(CredentialsParseError::SchemeMismatch) => {}
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
 
         match Credentials::from_str("Bearer-") {
             Err(CredentialsParseError::OneSPMismatch) => {}
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
     }
 }

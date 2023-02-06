@@ -105,7 +105,7 @@ pub enum CredentialsParseError {
 
 impl fmt::Display for CredentialsParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -159,14 +159,14 @@ mod tests {
                     assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
                     assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
         #[cfg(not(feature = "scheme-basic"))]
         {
             match "Basic bar".parse::<Credentials>() {
                 Err(CredentialsParseError::SchemeUnsupported(_)) => {}
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
 
@@ -181,26 +181,26 @@ mod tests {
                     assert_eq!(c.token, DEMO_CREDENTIALS_TOKEN_STR.into());
                     assert_eq!(c.to_string(), DEMO_CREDENTIALS_STR);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
         #[cfg(not(feature = "scheme-bearer"))]
         {
             match "Bearer bar".parse::<Credentials>() {
                 Err(CredentialsParseError::SchemeUnsupported(_)) => {}
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
 
         //
         match Credentials::from_str("") {
             Err(CredentialsParseError::SchemeUnknown) => {}
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
 
         match Credentials::from_str("Foo bar") {
             Err(CredentialsParseError::SchemeUnknown) => {}
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
     }
 }

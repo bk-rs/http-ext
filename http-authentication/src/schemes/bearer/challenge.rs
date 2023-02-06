@@ -136,7 +136,7 @@ pub enum ChallengeParseError {
 
 impl fmt::Display for ChallengeParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 

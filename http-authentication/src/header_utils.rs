@@ -191,7 +191,7 @@ mod tests {
                 assert_eq!(c.user_id, DEMO_CREDENTIALS_USER_ID_STR.into());
                 assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
             }
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
 
         //
@@ -222,7 +222,7 @@ mod tests {
                 assert_eq!(c.user_id, DEMO_CREDENTIALS_USER_ID_STR.into());
                 assert_eq!(c.password, DEMO_CREDENTIALS_PASSWORD_STR.into());
             }
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
 
         //
@@ -263,7 +263,7 @@ mod tests {
                     assert_eq!(c.realm, "bar".into());
                     assert_eq!(c.scope, Some("openid profile email".into()));
                 }
-                i => panic!("{} {:?}", i, c),
+                i => panic!("{i} {c:?}"),
             }
         }
 
@@ -292,7 +292,7 @@ mod tests {
                     assert_eq!(c.realm, "bar".into());
                     assert_eq!(c.scope, Some("openid profile email".into()));
                 }
-                i => panic!("{} {:?}", i, c),
+                i => panic!("{i} {c:?}"),
             }
         }
 
@@ -355,7 +355,7 @@ mod tests {
                     assert_eq!(c.realm, "bar".into());
                     assert_eq!(c.scope, Some("openid profile email".into()));
                 }
-                i => panic!("{} {:?}", i, c),
+                i => panic!("{i} {c:?}"),
             }
         }
 
@@ -384,7 +384,7 @@ mod tests {
                     assert_eq!(c.realm, "bar".into());
                     assert_eq!(c.scope, Some("openid profile email".into()));
                 }
-                i => panic!("{} {:?}", i, c),
+                i => panic!("{i} {c:?}"),
             }
         }
 

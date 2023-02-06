@@ -113,7 +113,7 @@ pub enum ChallengesParseError {
 
 impl fmt::Display for ChallengesParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -157,7 +157,7 @@ impl fmt::Display for ChallengesWithSlice<'_> {
                 .iter()
                 .map(|x| x.to_string())
                 .collect::<Vec<_>>()
-                .join(format!("{}{}", COMMA, SP).as_str())
+                .join(format!("{COMMA}{SP}").as_str())
         )
     }
 }
@@ -185,7 +185,7 @@ mod tests {
                     assert_eq!(c.charset, Some(DEMO_CHALLENGE_CHARSET_STR.into()));
                     assert_eq!(c.to_string(), DEMO_CHALLENGE_STR);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
 
             match DEMO_CHALLENGE_STR_SIMPLE.parse::<Challenges>() {
@@ -197,14 +197,14 @@ mod tests {
                     assert_eq!(c.charset, None);
                     assert_eq!(c.to_string(), DEMO_CHALLENGE_STR_SIMPLE);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
         #[cfg(not(feature = "scheme-basic"))]
         {
             match "Basic".parse::<Challenges>() {
                 Err(ChallengesParseError::SchemeUnsupported(_)) => {}
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
 
@@ -231,7 +231,7 @@ mod tests {
                     assert_eq!(c.error_uri, None);
                     assert_eq!(c.to_string(), DEMO_CHALLENGE_STR);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
 
             match DEMO_CHALLENGE_STR_SIMPLE.parse::<Challenges>() {
@@ -246,14 +246,14 @@ mod tests {
                     assert_eq!(c.error_uri, None);
                     assert_eq!(c.to_string(), DEMO_CHALLENGE_STR_SIMPLE);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
         #[cfg(not(feature = "scheme-bearer"))]
         {
             match "Bearer".parse::<Challenges>() {
                 Err(ChallengesParseError::SchemeUnsupported(_)) => {}
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
 
@@ -279,25 +279,25 @@ mod tests {
                                 let c = c.as_bearer().unwrap();
                                 assert_eq!(c.realm, bearer::DEMO_CHALLENGE_REALM_STR.into());
                             }
-                            i => panic!("{} {:?}", i, c),
+                            i => panic!("{i} {c:?}"),
                         }
                     }
 
                     assert_eq!(c.to_string(), s);
                 }
-                x => panic!("{:?}", x),
+                x => panic!("{x:?}"),
             }
         }
 
         //
         match Challenges::from_str("") {
             Err(ChallengesParseError::Other(_)) => {}
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
 
         match Challenges::from_str("Foo") {
             Err(ChallengesParseError::SchemeUnknown) => {}
-            x => panic!("{:?}", x),
+            x => panic!("{x:?}"),
         }
     }
 }
