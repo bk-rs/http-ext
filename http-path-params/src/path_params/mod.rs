@@ -27,7 +27,6 @@ pub trait PathParams: DowncastSync + DynClone {
     fn info(&self) -> PathParamsInfo {
         PathParamsInfo(
             (0..self.size())
-                .into_iter()
                 .map(|i| {
                     let (name, value) = self.get(i);
                     (name.map(Into::into), value)
@@ -39,7 +38,7 @@ pub trait PathParams: DowncastSync + DynClone {
         if info.0.len() != self.size() {
             return Err(SetError::InfoLengthMismatch);
         }
-        (0..self.size()).into_iter().try_for_each(|i| {
+        (0..self.size()).try_for_each(|i| {
             let (name, value) = info.get(i).expect("unreachable");
             self.set(i, &(name.as_deref(), value.as_ref()))
         })
@@ -73,7 +72,7 @@ pub enum SetError {
 }
 impl fmt::Display for SetError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 #[cfg(feature = "std")]
@@ -94,7 +93,7 @@ mod tests {
         #[allow(clippy::redundant_clone)]
         let path_params_list = path_params_list.clone();
         #[cfg(feature = "std")]
-        println!("path_params_list: {:?}", path_params_list);
+        println!("path_params_list: {path_params_list:?}");
         assert_eq!(path_params_list.0.len(), 2);
     }
 
