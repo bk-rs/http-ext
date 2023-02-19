@@ -1,4 +1,4 @@
-use core::{cmp::PartialEq, fmt};
+use core::cmp::PartialEq;
 
 //
 #[derive(Clone)]
@@ -13,11 +13,11 @@ where
     }
 }
 
-impl<T> fmt::Debug for HandlerData<T>
+impl<T> core::fmt::Debug for HandlerData<T>
 where
-    T: fmt::Debug,
+    T: core::fmt::Debug,
 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_tuple("HandlerData").field(&self.0).finish()
     }
 }

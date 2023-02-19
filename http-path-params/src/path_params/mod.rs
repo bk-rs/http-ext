@@ -1,5 +1,4 @@
 use alloc::string::String;
-use core::fmt;
 
 use downcast_rs::{impl_downcast, DowncastSync};
 use dyn_clone::{clone_trait_object, DynClone};
@@ -48,18 +47,18 @@ pub trait PathParams: DowncastSync + DynClone {
 impl_downcast!(PathParams);
 clone_trait_object!(PathParams);
 
-impl fmt::Debug for dyn PathParams {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Debug for dyn PathParams {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_tuple("PathParams").field(&self.info()).finish()
     }
 }
-impl fmt::Debug for dyn PathParams + Send {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Debug for dyn PathParams + Send {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_tuple("PathParams").field(&self.info()).finish()
     }
 }
-impl fmt::Debug for dyn PathParams + Send + Sync {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Debug for dyn PathParams + Send + Sync {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_tuple("PathParams").field(&self.info()).finish()
     }
 }
@@ -70,8 +69,8 @@ pub enum SetError {
     InfoLengthMismatch,
     ValueParseFailed(String),
 }
-impl fmt::Display for SetError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for SetError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{self:?}")
     }
 }

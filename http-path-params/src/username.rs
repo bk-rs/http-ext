@@ -1,12 +1,12 @@
 use alloc::string::{String, ToString as _};
-use core::{convert::Infallible, fmt, str::FromStr};
+use core::{convert::Infallible, str::FromStr};
 
 //
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Username(pub String);
 
-impl fmt::Display for Username {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Username {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
