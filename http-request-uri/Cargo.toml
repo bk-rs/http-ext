@@ -1,0 +1,24 @@
+[package]
+name = "http-request-uri"
+version = "0.2.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2021"
+description = "HTTP Request-URI"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/http-rs"
+homepage = "https://github.com/bk-rs/http-rs"
+documentation = "https://docs.rs/http-request-uri"
+keywords = []
+categories = []
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = [ "http" ]
+
+[dependencies]
+http = { version = "0.2", default-features = false, optional = true }
+
+[package.metadata.cargo-all-features]

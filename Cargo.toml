@@ -1,4 +1,7 @@
 [workspace]
 members = [
     "http-authentication",
+    "http-handler-data",
+    "http-path-params",
+    "http-request-uri",
 ]
