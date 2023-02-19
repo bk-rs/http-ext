@@ -17,5 +17,5 @@ default = ["std"]
 std = ["downcast-rs/std"]
 
 [dependencies]
-dyn-clone = { version = "1.0", default-features = false }
-downcast-rs = { version = "1.2", default-features = false }
+dyn-clone = { version = "1", default-features = false }
+downcast-rs = { version = "1", default-features = false }
