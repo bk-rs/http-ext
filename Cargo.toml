@@ -3,5 +3,6 @@ members = [
     "http-authentication",
     "http-handler-data",
     "http-path-params",
+    "http-request-body",
     "http-request-uri",
 ]

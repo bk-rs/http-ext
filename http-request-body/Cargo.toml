@@ -1,0 +1,33 @@
+[package]
+name = "http-request-body"
+version = "0.1.0"
+authors = ["vkill <vkill.net@gmail.com>"]
+edition = "2021"
+description = "HTTP Request Body"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/bk-rs/http-ext"
+homepage = "https://github.com/bk-rs/http-ext"
+documentation = "https://docs.rs/http-request-body"
+keywords = []
+categories = []
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+
+[dependencies]
+bytes = { version = "1", default-features = false }
+
+futures-util = { version = "0.3", default-features = false }
+pin-project-lite = { version = "0.2" }
+
+hyper-request-body = { version = "0.2", default-features = false, optional = true }
+warp-request-body = { version = "0.2", default-features = false, optional = true }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+futures-util = { version = "0.3" }
